@@ -1,3 +1,4 @@
+<?php
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LoanController;
 use App\Http\Controllers\Api\LoanRepaymentController;
@@ -13,6 +14,10 @@ use App\Http\Controllers\Api\BulkUploadController;
 use App\Http\Controllers\Api\SystemSettingController;
 use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/route-check', function () {
+    return response()->json(['message' => 'API is loading']);
+});
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
