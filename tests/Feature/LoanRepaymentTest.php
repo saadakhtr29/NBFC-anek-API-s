@@ -107,7 +107,7 @@ class LoanRepaymentTest extends TestCase
                 'updated_at'
             ]);
 
-        $this->assertDatabaseHas('loan_repayments', [
+        $this->assertDatabaseHas('repayments', [
             'loan_id' => $this->loan->id,
             'amount' => 1000,
             'payment_method' => 'bank_transfer'
@@ -208,7 +208,7 @@ class LoanRepaymentTest extends TestCase
                 'remarks' => 'Updated payment'
             ]);
 
-        $this->assertDatabaseHas('loan_repayments', [
+        $this->assertDatabaseHas('repayments', [
             'id' => $repayment->id,
             'amount' => 1500,
             'payment_method' => 'cash'
@@ -227,7 +227,7 @@ class LoanRepaymentTest extends TestCase
         $response->assertStatus(200)
             ->assertJson(['message' => 'Repayment deleted successfully']);
 
-        $this->assertDatabaseMissing('loan_repayments', ['id' => $repayment->id]);
+        $this->assertDatabaseMissing('repayments', ['id' => $repayment->id]);
     }
 
     /** @test */

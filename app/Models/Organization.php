@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Sanctum\HasApiTokens;
 
-class Organization extends Model
+class Organization extends Authenticatable
 {
-    use HasFactory, SoftDeletes;
+    use HasApiTokens, HasFactory, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +30,7 @@ class Organization extends Model
         'postal_code',
         'phone',
         'email',
+        'password',
         'website',
         'logo',
         'description',
@@ -40,6 +43,16 @@ class Organization extends Model
         'timezone',
         'settings',
         'remarks'
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     /**
@@ -94,6 +107,22 @@ class Organization extends Model
     public function transactionLogs()
     {
         return $this->hasMany(TransactionLog::class);
+    }
+
+    /**
+     * Get the salaries of the organization.
+     */
+    public function salaries()
+    {
+        return $this->hasMany(Salary::class);
+    }
+
+    /**
+     * Get the attendances of the organization.
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 
     /**

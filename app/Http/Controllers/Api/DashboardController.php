@@ -287,4 +287,19 @@ class DashboardController extends Controller
 
         return round(($presentDays / $totalDays) * 100, 2);
     }
+
+    public function employeeStats(Employee $employee)
+    {
+        $stats = [
+            'total_loans' => $employee->loans()->count(),
+            'total_loan_amount' => $employee->loans()->sum('amount'),
+            'total_paid_amount' => $employee->loans()->sum('paid_amount'),
+            'total_pending_amount' => $employee->loans()->sum('pending_amount'),
+            'average_loan_amount' => $employee->loans()->avg('amount'),
+            'total_salary_paid' => $employee->salaries()->sum('amount'),
+            'attendance_rate' => $this->calculateAttendanceRate($employee),
+        ];
+
+        return response()->json(['data' => $stats]);
+    }
 } 

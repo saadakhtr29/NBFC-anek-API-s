@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\OrganizationSettingController;
 use App\Http\Controllers\Api\BulkUploadController;
 use App\Http\Controllers\Api\SystemSettingController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\EmployeeController;
 use Illuminate\Support\Facades\Route;
 
 // Health check endpoint
@@ -41,14 +42,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/user', [AuthController::class, 'user']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
+    // Employee routes
+    Route::apiResource('employees', EmployeeController::class);
+    Route::get('employees/statistics', [EmployeeController::class, 'statistics']);
+    Route::get('employees/export', [EmployeeController::class, 'export']);
+
     // Loan routes
     Route::apiResource('loans', LoanController::class);
     Route::get('loans/summary', [LoanController::class, 'summary']);
     Route::get('loans/{loan}/status', [LoanController::class, 'status']);
 
     // Loan repayment routes
-    Route::apiResource('loan-repayments', LoanRepaymentController::class);
-    Route::get('loans/{loan}/repayments', [LoanRepaymentController::class, 'loanRepayments']);
+    Route::get('loans/{loan}/repayments', [LoanRepaymentController::class, 'index']);
+    Route::post('loans/{loan}/repayments', [LoanRepaymentController::class, 'store']);
+    Route::get('loans/{loan}/repayments/{repayment}', [LoanRepaymentController::class, 'show']);
+    Route::put('loans/{loan}/repayments/{repayment}', [LoanRepaymentController::class, 'update']);
+    Route::delete('loans/{loan}/repayments/{repayment}', [LoanRepaymentController::class, 'destroy']);
+    Route::get('loans/{loan}/repayments/summary', [LoanRepaymentController::class, 'summary']);
 
     // Loan deficit routes
     Route::apiResource('loan-deficits', LoanDeficitController::class);
@@ -121,4 +131,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/loans', [DashboardController::class, 'loanStats']);
     Route::get('/dashboard/attendance', [DashboardController::class, 'attendanceStats']);
     Route::get('/dashboard/salaries', [DashboardController::class, 'salaryStats']);
+    Route::get('/dashboard/employee/{employee}', [DashboardController::class, 'employeeStats']);
 }); 

@@ -97,19 +97,7 @@ class EmployeeResource extends JsonResource
             'organization' => new OrganizationResource($this->whenLoaded('organization')),
             'user' => new UserResource($this->whenLoaded('user')),
             'loans' => LoanResource::collection($this->whenLoaded('loans')),
-            'full_name' => $this->full_name,
-            'active_loans' => LoanResource::collection($this->whenLoaded('loans', function () {
-                return $this->active_loans;
-            })),
-            'total_loan_amount' => $this->whenLoaded('loans', function () {
-                return $this->total_loan_amount;
-            }),
-            'total_repaid_amount' => $this->whenLoaded('repayments', function () {
-                return $this->total_repaid_amount;
-            }),
-            'remaining_loan_amount' => $this->whenLoaded(['loans', 'repayments'], function () {
-                return $this->remaining_loan_amount;
-            })
+            'full_name' => $this->full_name
         ];
     }
 } 

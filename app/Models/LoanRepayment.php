@@ -10,6 +10,8 @@ class LoanRepayment extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'repayments';
+
     protected $fillable = [
         'loan_id',
         'employee_id',

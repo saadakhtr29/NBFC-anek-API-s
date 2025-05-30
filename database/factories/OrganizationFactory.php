@@ -49,6 +49,7 @@ class OrganizationFactory extends Factory
             'postal_code' => $this->faker->postcode(),
             'phone' => $this->faker->phoneNumber(),
             'email' => $this->faker->companyEmail(),
+            'password' => bcrypt('password123'),
             'website' => $this->faker->url(),
             'logo' => null,
             'description' => $this->faker->paragraph(),

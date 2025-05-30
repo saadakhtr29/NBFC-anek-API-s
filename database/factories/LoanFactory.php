@@ -84,8 +84,20 @@ class LoanFactory extends Factory
                 'Check',
                 'Wire Transfer'
             ]),
-            'disbursement_details' => $this->faker->optional()->array(),
-            'documents' => $this->faker->optional()->array(),
+            'disbursement_details' => $this->faker->optional()->randomElement([
+                [
+                    'account_number' => $this->faker->bankAccountNumber,
+                    'bank_name' => $this->faker->company,
+                    'transaction_id' => $this->faker->uuid
+                ]
+            ]),
+            'documents' => $this->faker->optional()->randomElement([
+                [
+                    'document_type' => $this->faker->randomElement(['ID', 'Proof of Income', 'Bank Statement']),
+                    'file_name' => $this->faker->word . '.pdf',
+                    'upload_date' => $this->faker->dateTimeThisMonth()->format('Y-m-d')
+                ]
+            ]),
             'remarks' => $this->faker->optional()->sentence(),
             'settings' => [
                 'late_fee_rate' => $this->faker->randomFloat(2, 1, 5),

@@ -14,13 +14,19 @@ return new class extends Migration
         Schema::create('repayments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('loan_id')->constrained()->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 10, 2);
+            $table->decimal('principal_amount', 10, 2);
+            $table->decimal('interest_amount', 10, 2);
             $table->date('payment_date');
             $table->string('payment_method')->nullable();
+            $table->string('payment_type')->nullable();
             $table->string('reference_number')->nullable();
             $table->text('notes')->nullable();
             $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
+            $table->string('transaction_id')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
