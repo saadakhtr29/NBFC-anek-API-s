@@ -15,19 +15,31 @@ use App\Http\Controllers\Api\SystemSettingController;
 use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Support\Facades\Route;
 
+// Health check endpoint
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'healthy',
+        'message' => 'API is running',
+        'timestamp' => now()
+    ]);
+});
+
 Route::get('/route-check', function () {
     return response()->json(['message' => 'API is loading']);
 });
 
 // Public routes
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/organization/login', [AuthController::class, 'organizationLogin']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
+    Route::get('/auth/user', [AuthController::class, 'user']);
+    Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
     // Loan routes
     Route::apiResource('loans', LoanController::class);

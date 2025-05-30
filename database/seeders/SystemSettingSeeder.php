@@ -10,7 +10,13 @@ class SystemSettingSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('email', 'admin@example.com')->first();
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt('password'),
+            ]
+        );
 
         $settings = [
             [
@@ -126,7 +132,10 @@ class SystemSettingSeeder extends Seeder
         ];
 
         foreach ($settings as $setting) {
-            SystemSetting::create($setting + ['updated_by' => $admin->id]);
+            SystemSetting::firstOrCreate(
+                ['key' => $setting['key']],
+                $setting + ['updated_by' => $admin->id]
+            );
         }
     }
 } 

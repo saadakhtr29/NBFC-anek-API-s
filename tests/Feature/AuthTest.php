@@ -20,7 +20,7 @@ class AuthTest extends TestCase
             'password' => bcrypt('password123')
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
             'password' => 'password123'
         ]);
@@ -43,7 +43,7 @@ class AuthTest extends TestCase
             'password' => bcrypt('password123')
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
             'password' => 'wrong_password'
         ]);
@@ -127,7 +127,7 @@ class AuthTest extends TestCase
             ]);
 
         // Verify new password works
-        $this->postJson('/api/login', [
+        $this->postJson('/api/auth/login', [
             'email' => $user->email,
             'password' => 'new_password'
         ])->assertStatus(200);

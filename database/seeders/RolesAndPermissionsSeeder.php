@@ -76,7 +76,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create($permission);
+            Permission::firstOrCreate($permission);
         }
 
         // Create roles and assign permissions
@@ -118,8 +118,8 @@ class RolesAndPermissionsSeeder extends Seeder
             $permissions = $role['permissions'];
             unset($role['permissions']);
             
-            $role = Role::create($role);
-            $role->permissions()->attach(
+            $role = Role::firstOrCreate($role);
+            $role->permissions()->syncWithoutDetaching(
                 Permission::whereIn('slug', $permissions)->get()
             );
         }

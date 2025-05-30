@@ -8,8 +8,12 @@ services:
         container_name: nbfc-app
         restart: unless-stopped
         working_dir: /var/www/html
+        ports:
+            - "8000:8080"
         volumes:
             - ./:/var/www/html
+        env_file:
+            - .env
         networks:
             - nbfc-network
         depends_on:
@@ -21,10 +25,10 @@ services:
         container_name: nbfc-db
         restart: unless-stopped
         environment:
-            MYSQL_DATABASE: ${DB_DATABASE}
-            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
-            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_DATABASE: nbfc
+            MYSQL_ROOT_PASSWORD: password
+            MYSQL_PASSWORD: password
+            MYSQL_USER: nbfc-user
         volumes:
             - dbdata:/var/lib/mysql
         networks:

@@ -5,16 +5,18 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip
+    unzip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -22,32 +24,40 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy existing application directory
-COPY . .
-
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www/html
-
-# Change current user to www-data
-USER www-data
+# Copy composer files first
+COPY composer.json composer.lock ./
 
 # Install dependencies
-RUN composer install --no-interaction --no-dev --optimize-autoloader
+RUN composer install --no-scripts --no-autoloader --no-dev
 
-# Generate application key
-RUN php artisan key:generate
+# Copy the rest of the application
+COPY . .
 
-# Set permissions
-RUN chmod -R 775 storage bootstrap/cache
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Generate application key if not exists
+RUN if [ ! -f .env ]; then \
+        cp .env.example .env; \
+    fi
+
+# Optimize autoloader and generate key
+RUN composer dump-autoload --optimize \
+    && php artisan key:generate --force \
+    && php artisan config:cache \
+    && php artisan route:cache
 
 # Configure Apache
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
+RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf
 
-# Switch back to root user
-USER root
+# Switch to non-root user
+USER www-data
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8080
+EXPOSE 8080
 
 CMD ["apache2-foreground"] 
