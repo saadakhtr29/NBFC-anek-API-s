@@ -191,6 +191,54 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
+     *     path="/api/auth/change-password",
+     *     summary="Change user password",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"current_password", "new_password", "new_password_confirmation"},
+     *             @OA\Property(property="current_password", type="string", format="password"),
+     *             @OA\Property(property="new_password", type="string", format="password"),
+     *             @OA\Property(property="new_password_confirmation", type="string", format="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password changed successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
+     */
+    public function changePassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect'], 422);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully']);
+    }
+
+    /**
+     * @OA\Post(
      *     path="/api/organization/login",
      *     summary="Login as organization and create token",
      *     tags={"Authentication"},
@@ -229,7 +277,7 @@ class AuthController extends Controller
 
         $organization = \App\Models\Organization::where('email', $request->email)->first();
 
-        if (!$organization || !\Illuminate\Support\Facades\Hash::check($request->password, $organization->password)) {
+        if (!$organization || !Hash::check($request->password, $organization->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 

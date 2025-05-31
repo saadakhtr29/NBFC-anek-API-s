@@ -19,12 +19,11 @@ return new class extends Migration
             $table->decimal('principal_amount', 10, 2);
             $table->decimal('interest_amount', 10, 2);
             $table->date('payment_date');
-            $table->string('payment_method')->nullable();
+            $table->string('payment_method');
             $table->string('payment_type')->nullable();
-            $table->string('reference_number')->nullable();
-            $table->text('notes')->nullable();
-            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
             $table->string('transaction_id')->nullable();
+            $table->text('remarks')->nullable();
+            $table->enum('status', ['pending', 'completed', 'failed'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });

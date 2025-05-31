@@ -14,6 +14,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create admin user for seeder dependencies
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('adminpassword'),
+            ]
+        );
+
         // Create test user
         User::updateOrCreate(
             ['email' => 'test@example.com'],

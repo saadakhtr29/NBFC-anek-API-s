@@ -255,7 +255,7 @@ class OrganizationController extends Controller
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
-     *         response=200,
+     *         response=204,
      *         description="Organization deleted successfully"
      *     ),
      *     @OA\Response(
@@ -292,7 +292,9 @@ class OrganizationController extends Controller
                 Storage::disk('public')->delete($organization->logo);
             }
 
-            // Log the transaction before deletion
+            $organization->delete();
+
+            // Log the transaction
             TransactionLog::create([
                 'user_id' => auth()->id(),
                 'action' => 'delete',
@@ -302,13 +304,9 @@ class OrganizationController extends Controller
                 'ip_address' => request()->ip()
             ]);
 
-            $organization->delete();
-
             DB::commit();
 
-            return response()->json([
-                'message' => 'Organization deleted successfully'
-            ]);
+            return response()->noContent(204);
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;

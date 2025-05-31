@@ -14,6 +14,34 @@ class OrganizationSettingSeeder extends Seeder
      */
     public function run(): void
     {
+        // Ensure a test organization exists for login testing
+        $testOrg = \App\Models\Organization::firstOrCreate(
+            ['email' => 'org@example.com'],
+            [
+                'name' => 'Test Organization',
+                'code' => 'TESTORG',
+                'type' => 'Private Limited',
+                'registration_number' => 'REG123456',
+                'tax_number' => 'TAX123456',
+                'address' => '123 Test Street',
+                'city' => 'Test City',
+                'state' => 'Test State',
+                'country' => 'Test Country',
+                'postal_code' => '12345',
+                'phone' => '1234567890',
+                'password' => bcrypt('password123'),
+                'status' => 'active',
+                'founding_date' => '2020-01-01',
+                'industry' => 'Technology',
+                'size' => 'medium',
+                'currency' => 'USD',
+                'timezone' => 'UTC',
+                'website' => 'https://example.com',
+                'logo' => 'https://example.com/logo.png',
+                'description' => 'Test Organization Description'
+            ]
+        );
+
         $organizations = Organization::all();
         $admin = User::where('email', 'admin@example.com')->first();
 
@@ -94,7 +122,7 @@ class OrganizationSettingSeeder extends Seeder
                 ],
                 [
                     'key' => 'company_logo',
-                    'value' => $organization->logo_url,
+                    'value' => $organization->logo,
                     'description' => 'Organization logo URL',
                     'is_public' => true,
                 ],
@@ -153,30 +181,5 @@ class OrganizationSettingSeeder extends Seeder
                 ]);
             }
         }
-
-        // Ensure a test organization exists for login testing
-        $testOrg = \App\Models\Organization::firstOrCreate(
-            ['email' => 'org@example.com'],
-            [
-                'name' => 'Test Organization',
-                'code' => 'TESTORG',
-                'type' => 'Private Limited',
-                'registration_number' => 'REG123456',
-                'tax_number' => 'TAX123456',
-                'address' => '123 Test Street',
-                'city' => 'Test City',
-                'state' => 'Test State',
-                'country' => 'Test Country',
-                'postal_code' => '12345',
-                'phone' => '1234567890',
-                'password' => bcrypt('password123'),
-                'status' => 'active',
-                'founding_date' => '2020-01-01',
-                'industry' => 'Technology',
-                'size' => 'medium',
-                'currency' => 'USD',
-                'timezone' => 'UTC',
-            ]
-        );
     }
 } 

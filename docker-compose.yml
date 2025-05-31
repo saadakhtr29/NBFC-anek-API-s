@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3"
 
 services:
     app:
@@ -7,39 +7,31 @@ services:
             dockerfile: Dockerfile
         container_name: nbfc-app
         restart: unless-stopped
-        working_dir: /var/www/html
-        ports:
-            - "8000:8080"
+        working_dir: /var/www
         volumes:
-            - ./:/var/www/html
-        env_file:
-            - .env
+            - ./:/var/www
         networks:
             - nbfc-network
+        ports:
+            - "8080:80"
         depends_on:
             - db
-            - redis
 
     db:
         image: mysql:8.0
         container_name: nbfc-db
         restart: unless-stopped
         environment:
-            MYSQL_DATABASE: nbfc
-            MYSQL_ROOT_PASSWORD: password
-            MYSQL_PASSWORD: password
-            MYSQL_USER: nbfc-user
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
         volumes:
             - dbdata:/var/lib/mysql
         networks:
             - nbfc-network
-
-    redis:
-        image: redis:alpine
-        container_name: nbfc-redis
-        restart: unless-stopped
-        networks:
-            - nbfc-network
+        ports:
+            - "3307:3306"
 
 networks:
     nbfc-network:
@@ -47,3 +39,4 @@ networks:
 
 volumes:
     dbdata:
+        driver: local

@@ -26,7 +26,7 @@ class LoanRequest extends FormRequest
             'organization_id' => 'required|exists:organizations,id',
             'employee_id' => 'required|exists:employees,id',
             'loan_number' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50',
                 Rule::unique('loans')->ignore($this->loan)
@@ -38,7 +38,7 @@ class LoanRequest extends FormRequest
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
             'status' => [
-                'required',
+                'nullable',
                 Rule::in(['pending', 'approved', 'rejected', 'disbursed', 'active', 'completed', 'defaulted'])
             ],
             'purpose' => 'required|string|max:1000',
@@ -53,14 +53,39 @@ class LoanRequest extends FormRequest
             'rejection_reason' => 'nullable|string|max:1000',
             'disbursed_by' => 'nullable|exists:users,id',
             'disbursed_at' => 'nullable|date',
-            'disbursement_method' => 'nullable|string|max:100',
+            'disbursement_method' => 'nullable|string|max:50',
             'disbursement_details' => 'nullable|array',
             'documents' => 'nullable|array',
-            'documents.*' => 'string',
             'remarks' => 'nullable|string|max:1000',
-            'settings' => 'nullable|array',
-            'settings.*' => 'string'
+            'settings' => 'nullable|array'
         ];
+
+        // Make certain fields optional during updates
+        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
+            $optionalFields = [
+                'organization_id',
+                'employee_id',
+                'loan_number',
+                'type',
+                'term_months',
+                'start_date',
+                'end_date',
+                'status'
+            ];
+
+            foreach ($optionalFields as $field) {
+                if (isset($rules[$field])) {
+                    if (is_string($rules[$field])) {
+                        $rules[$field] = str_replace('required|', '', $rules[$field]);
+                        $rules[$field] = str_replace('required', '', $rules[$field]);
+                    } elseif (is_array($rules[$field])) {
+                        $rules[$field] = array_filter($rules[$field], function($rule) {
+                            return $rule !== 'required';
+                        });
+                    }
+                }
+            }
+        }
 
         return $rules;
     }

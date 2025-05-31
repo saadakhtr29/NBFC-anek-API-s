@@ -89,10 +89,10 @@ class LoanRepaymentController extends Controller
         try {
             DB::beginTransaction();
 
-            // Check if loan is active
-            if ($loan->status !== 'active') {
+            // Check if loan is active or disbursed
+            if (!in_array($loan->status, ['active', 'disbursed', 'pending'])) {
                 return response()->json([
-                    'message' => 'Cannot add repayment for non-active loan'
+                    'message' => 'Cannot add repayment for loan with status: ' . $loan->status
                 ], 422);
             }
 
@@ -106,6 +106,9 @@ class LoanRepaymentController extends Controller
 
             $data = $request->validated();
             $data['loan_id'] = $loan->id;
+            $data['employee_id'] = $loan->employee_id;
+            $data['principal_amount'] = $data['amount'];
+            $data['interest_amount'] = 0;
 
             $repayment = LoanRepayment::create($data);
 

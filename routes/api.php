@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\BulkUploadController;
 use App\Http\Controllers\Api\SystemSettingController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\OrganizationController;
 use Illuminate\Support\Facades\Route;
 
 // Health check endpoint
@@ -50,7 +51,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Loan routes
     Route::apiResource('loans', LoanController::class);
     Route::get('loans/summary', [LoanController::class, 'summary']);
+    Route::get('loans/statistics', [LoanController::class, 'statistics']);
     Route::get('loans/{loan}/status', [LoanController::class, 'status']);
+    Route::post('loans/{loan}/approve', [LoanController::class, 'approve']);
+    Route::post('loans/{loan}/reject', [LoanController::class, 'reject']);
+    Route::post('loans/{loan}/disburse', [LoanController::class, 'disburse']);
 
     // Loan repayment routes
     Route::get('loans/{loan}/repayments', [LoanRepaymentController::class, 'index']);
@@ -84,6 +89,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/repayments/{repayment}', [RepaymentController::class, 'update']);
     Route::delete('/repayments/{repayment}', [RepaymentController::class, 'destroy']);
     Route::get('/repayments/summary', [RepaymentController::class, 'summary']);
+    Route::post('/repayments/{repayment}/approve', [\App\Http\Controllers\Api\RepaymentController::class, 'approve']);
+    Route::post('/repayments/{repayment}/reject', [\App\Http\Controllers\Api\RepaymentController::class, 'reject']);
+    Route::get('/repayments/statistics', [\App\Http\Controllers\Api\RepaymentController::class, 'statistics']);
 
     // Salary Management Routes
     Route::get('/salaries', [SalaryController::class, 'index']);
@@ -132,4 +140,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/attendance', [DashboardController::class, 'attendanceStats']);
     Route::get('/dashboard/salaries', [DashboardController::class, 'salaryStats']);
     Route::get('/dashboard/employee/{employee}', [DashboardController::class, 'employeeStats']);
+
+    // Organization routes
+    Route::apiResource('organizations', OrganizationController::class);
+    Route::get('organizations/statistics', [OrganizationController::class, 'statistics']);
+});
+
+// OpenAPI JSON route
+Route::get('/api-docs.json', function () {
+    return response()->file(storage_path('api-docs/api-docs.json'));
 }); 

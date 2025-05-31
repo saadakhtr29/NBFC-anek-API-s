@@ -24,7 +24,7 @@ class LoanRepaymentRequest extends FormRequest
         return [
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
-            'payment_method' => 'required|in:cash,bank_transfer,check',
+            'payment_method' => 'required|in:bank_transfer,cash,cheque',
             'transaction_id' => 'nullable|string|max:100',
             'remarks' => 'nullable|string|max:500'
         ];
@@ -44,7 +44,7 @@ class LoanRepaymentRequest extends FormRequest
             'payment_date.required' => 'The payment date is required.',
             'payment_date.date' => 'The payment date must be a valid date.',
             'payment_method.required' => 'The payment method is required.',
-            'payment_method.in' => 'The payment method must be cash, bank transfer, or check.',
+            'payment_method.in' => 'The payment method must be bank transfer, cash, or cheque.',
             'transaction_id.max' => 'The transaction ID cannot exceed 100 characters.',
             'remarks.max' => 'The remarks cannot exceed 500 characters.'
         ];

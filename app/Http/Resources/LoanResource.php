@@ -93,6 +93,26 @@ class LoanResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $totalInterest = $this->amount * ($this->interest_rate / 100);
+        $totalAmount = $this->amount + $totalInterest;
+        $monthlyPayment = $totalAmount / $this->term_months;
+        $totalRepaid = $this->repayments()->where('status', 'completed')->sum('amount');
+        $remainingAmount = $totalAmount - $totalRepaid;
+        
+        $nextPaymentDue = null;
+        $daysOverdue = 0;
+        $isOverdue = false;
+        
+        if ($this->status === 'disbursed' || $this->status === 'active') {
+            $lastPayment = $this->repayments()->where('status', 'completed')->latest('payment_date')->first();
+            $nextPaymentDue = $lastPayment ? $lastPayment->payment_date->addMonth() : $this->start_date;
+            
+            if ($nextPaymentDue < now()) {
+                $daysOverdue = now()->diffInDays($nextPaymentDue);
+                $isOverdue = true;
+            }
+        }
+
         return [
             'id' => $this->id,
             'organization_id' => $this->organization_id,
@@ -130,19 +150,36 @@ class LoanResource extends JsonResource
             'rejector' => new UserResource($this->whenLoaded('rejector')),
             'disburser' => new UserResource($this->whenLoaded('disburser')),
             'repayments' => LoanRepaymentResource::collection($this->whenLoaded('repayments')),
-            'documents' => DocumentResource::collection($this->whenLoaded('documents')),
-            'statistics' => [
-                'total_interest' => $this->total_interest,
-                'total_amount' => $this->total_amount,
-                'monthly_payment' => $this->monthly_payment,
-                'total_repaid' => $this->total_repaid,
-                'remaining_amount' => $this->remaining_amount,
-                'next_payment_due_date' => $this->next_payment_due_date,
-                'days_overdue' => $this->days_overdue,
-                'is_overdue' => $this->is_overdue
-            ],
-            'payment_history' => $this->payment_history,
-            'payment_schedule' => $this->payment_schedule
+            'loan_documents' => LoanDocumentResource::collection($this->whenLoaded('loanDocuments')),
+            'total_interest' => $totalInterest,
+            'total_amount' => $totalAmount,
+            'monthly_payment' => $monthlyPayment,
+            'total_repaid' => $totalRepaid,
+            'remaining_amount' => $remainingAmount,
+            'next_payment_due_date' => $nextPaymentDue,
+            'days_overdue' => $daysOverdue,
+            'is_overdue' => $isOverdue,
+            'payment_history' => $this->repayments()->where('status', 'completed')->get()->map(function ($repayment) {
+                return [
+                    'date' => $repayment->payment_date,
+                    'amount' => $repayment->amount,
+                    'principal' => $repayment->principal_amount,
+                    'interest' => $repayment->interest_amount,
+                    'late_fee' => 0
+                ];
+            }),
+            'payment_schedule' => collect(range(1, $this->term_months))->map(function ($month) use ($monthlyPayment, $totalAmount) {
+                $dueDate = $this->start_date->copy()->addMonths($month - 1);
+                $remainingAmount = $totalAmount - ($monthlyPayment * ($month - 1));
+                return [
+                    'payment_number' => $month,
+                    'due_date' => $dueDate,
+                    'payment_amount' => $monthlyPayment,
+                    'principal_amount' => $monthlyPayment * 0.8, // Assuming 80% principal, 20% interest
+                    'interest_amount' => $monthlyPayment * 0.2,
+                    'remaining_amount' => $remainingAmount
+                ];
+            })
         ];
     }
 }

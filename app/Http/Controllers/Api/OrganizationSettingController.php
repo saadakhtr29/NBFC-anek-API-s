@@ -269,9 +269,8 @@ class OrganizationSettingController extends Controller
      */
     public function destroy(OrganizationSetting $setting)
     {
-        $oldValues = $setting->toArray();
-
-        DB::transaction(function () use ($setting, $oldValues) {
+        DB::transaction(function () use ($setting) {
+            $oldValues = $setting->toArray();
             $setting->delete();
 
             TransactionLog::create([
@@ -285,16 +284,16 @@ class OrganizationSettingController extends Controller
             ]);
         });
 
-        return response()->json(['message' => 'Organization setting deleted successfully']);
+        return response()->noContent(204);
     }
 
     /**
-     * Get organization settings by key.
+     * Get organization setting by key.
      *
      * @OA\Get(
      *     path="/api/organization-settings/key/{key}",
      *     tags={"Organization Settings"},
-     *     summary="Get organization settings by key",
+     *     summary="Get organization setting by key",
      *     @OA\Parameter(
      *         name="key",
      *         in="path",
@@ -310,26 +309,38 @@ class OrganizationSettingController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Organization settings by key",
+     *         description="Organization setting details",
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/OrganizationSettingResource"))
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="key", type="string"),
+     *                 @OA\Property(property="value", type="object")
+     *             )
      *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Organization setting not found"
      *     )
      * )
      */
     public function getByKey($key, Request $request)
     {
-        $query = OrganizationSetting::query()
-            ->with(['organization', 'updatedBy'])
-            ->where('key', $key);
+        $query = OrganizationSetting::where('key', $key);
 
         if ($request->has('organization_id')) {
             $query->where('organization_id', $request->organization_id);
         }
 
-        $settings = $query->paginate(10);
+        $setting = $query->firstOrFail();
 
-        return OrganizationSettingResource::collection($settings);
+        return response()->json([
+            'data' => [
+                'key' => $setting->key,
+                'value' => $setting->value
+            ]
+        ]);
     }
 } 

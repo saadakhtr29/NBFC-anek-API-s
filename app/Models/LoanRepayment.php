@@ -19,6 +19,7 @@ class LoanRepayment extends Model
         'principal_amount',
         'interest_amount',
         'payment_date',
+        'payment_method',
         'payment_type',
         'transaction_id',
         'status',

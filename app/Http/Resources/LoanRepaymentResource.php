@@ -45,14 +45,20 @@ class LoanRepaymentResource extends JsonResource
         return [
             'id' => $this->id,
             'loan_id' => $this->loan_id,
+            'employee_id' => $this->employee_id,
             'amount' => $this->amount,
+            'principal_amount' => $this->principal_amount,
+            'interest_amount' => $this->interest_amount,
             'payment_date' => $this->payment_date,
             'payment_method' => $this->payment_method,
+            'payment_type' => $this->payment_type,
             'transaction_id' => $this->transaction_id,
+            'status' => $this->status,
             'remarks' => $this->remarks,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'loan' => new LoanResource($this->whenLoaded('loan')),
+            'employee' => new EmployeeResource($this->whenLoaded('employee')),
             'is_late' => $this->payment_date > $this->loan->start_date->addMonths($this->loan->repayments->count()),
             'days_late' => $this->payment_date > $this->loan->start_date->addMonths($this->loan->repayments->count())
                 ? $this->payment_date->diffInDays($this->loan->start_date->addMonths($this->loan->repayments->count()))

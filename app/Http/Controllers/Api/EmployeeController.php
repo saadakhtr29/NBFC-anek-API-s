@@ -134,7 +134,7 @@ class EmployeeController extends Controller
 
             // Log the employee creation
             TransactionLog::create([
-                'employee_id' => auth()->id(),
+                'employee_id' => $employee->id,
                 'transaction_type' => 'employee_created',
                 'status' => 'completed',
                 'remarks' => "Employee {$employee->full_name} created"
@@ -206,7 +206,7 @@ class EmployeeController extends Controller
 
             // Log the update
             TransactionLog::create([
-                'employee_id' => auth()->id(),
+                'employee_id' => $employee->id,
                 'transaction_type' => 'employee_updated',
                 'status' => 'completed',
                 'remarks' => "Employee {$employee->full_name} updated"
@@ -253,7 +253,7 @@ class EmployeeController extends Controller
 
             // Log the deletion
             TransactionLog::create([
-                'employee_id' => auth()->id(),
+                'employee_id' => $employee->id,
                 'transaction_type' => 'employee_deleted',
                 'status' => 'completed',
                 'remarks' => "Employee {$employee->full_name} deleted"
@@ -346,28 +346,58 @@ class EmployeeController extends Controller
             // Add headers
             fputcsv($file, [
                 'ID',
-                'Name',
+                'Employee ID',
+                'First Name',
+                'Last Name',
                 'Email',
                 'Phone',
                 'Address',
-                'Position',
+                'City',
+                'State',
+                'Country',
+                'Postal Code',
+                'Date of Birth',
+                'Date of Joining',
+                'Designation',
                 'Department',
-                'Joining Date',
-                'Salary'
+                'Salary',
+                'Status',
+                'Employment Type',
+                'Bank Name',
+                'Bank Account Number',
+                'Bank IFSC Code',
+                'Emergency Contact Name',
+                'Emergency Contact Phone',
+                'Emergency Contact Relationship'
             ]);
 
             // Add data
             foreach ($employees as $employee) {
                 fputcsv($file, [
                     $employee->id,
-                    $employee->name,
+                    $employee->employee_id,
+                    $employee->first_name,
+                    $employee->last_name,
                     $employee->email,
                     $employee->phone,
                     $employee->address,
-                    $employee->position,
+                    $employee->city,
+                    $employee->state,
+                    $employee->country,
+                    $employee->postal_code,
+                    $employee->date_of_birth,
+                    $employee->date_of_joining,
+                    $employee->designation,
                     $employee->department,
-                    $employee->joining_date,
-                    $employee->salary
+                    $employee->salary,
+                    $employee->status,
+                    $employee->employment_type,
+                    $employee->bank_name,
+                    $employee->bank_account_number,
+                    $employee->bank_ifsc_code,
+                    $employee->emergency_contact_name,
+                    $employee->emergency_contact_phone,
+                    $employee->emergency_contact_relationship
                 ]);
             }
 

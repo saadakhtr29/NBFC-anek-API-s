@@ -65,6 +65,13 @@ class OrganizationRequest extends FormRequest
             'remarks' => 'nullable|string|max:1000'
         ];
 
+        // Add password validation only for create
+        if (!$this->organization) {
+            $rules['password'] = 'required|string|min:8';
+        } else {
+            $rules['password'] = 'nullable|string|min:8';
+        }
+
         return $rules;
     }
 
@@ -91,6 +98,9 @@ class OrganizationRequest extends FormRequest
             'email.required' => 'The email address is required.',
             'email.email' => 'Please provide a valid email address.',
             'email.unique' => 'This email address is already registered.',
+            'password.required' => 'The password is required.',
+            'password.string' => 'The password must be a string.',
+            'password.min' => 'The password must be at least 8 characters long.',
             'website.url' => 'Please provide a valid website URL.',
             'logo.image' => 'The logo must be an image file.',
             'logo.max' => 'The logo size cannot exceed 2MB.',

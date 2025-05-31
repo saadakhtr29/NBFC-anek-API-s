@@ -61,6 +61,7 @@ class Loan extends Model
         'rejected_at' => 'datetime',
         'disbursed_at' => 'datetime',
         'documents' => 'array',
+        'disbursement_details' => 'array',
         'settings' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -81,6 +82,14 @@ class Loan extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    /**
+     * Get the documents associated with the loan.
+     */
+    public function loanDocuments(): HasMany
+    {
+        return $this->hasMany(LoanDocument::class);
     }
 
     /**

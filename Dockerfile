@@ -1,63 +1,48 @@
-FROM php:8.2-apache
+FROM --platform=linux/amd64 php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    unzip
 
-# Configure and install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www/html
+WORKDIR /var/www
 
-# Copy composer files first
-COPY composer.json composer.lock ./
-
-# Install dependencies
-RUN composer install --no-scripts --no-autoloader --no-dev
-
-# Copy the rest of the application
+# Copy application files
 COPY . .
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Install dependencies
+RUN composer install --no-interaction --no-dev --optimize-autoloader
 
-# Generate application key if not exists
-RUN if [ ! -f .env ]; then \
-        cp .env.example .env; \
-    fi
+# Set permissions
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage \
+    && chmod -R 755 /var/www/bootstrap/cache
 
-# Optimize autoloader and generate key
-RUN composer dump-autoload --optimize \
-    && php artisan key:generate --force \
-    && php artisan config:cache \
-    && php artisan route:cache
+# Make startup script executable
+RUN chmod +x docker/startup.sh
 
-# Configure Apache
-RUN a2enmod rewrite headers
-COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
-RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf
+# Set environment variables
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV PORT=8080
 
-# Switch to non-root user
-USER www-data
-
-# Expose port 8080
+# Expose port
 EXPOSE 8080
 
-CMD ["apache2-foreground"] 
+# Start application
+CMD ["/bin/bash", "docker/startup.sh"] 
